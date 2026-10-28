@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Global Olympic Sports Performance Analysis</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="hero">
+    <p class="eyebrow">SPORTS DATA EXPLORER</p>
+    <h1>Global Olympic Sports Performance Analysis</h1>
+    <p>Explore Olympic medal-winning athlete records by season, year, country, and sport.</p>
+  </header>
+
+  <main class="container">
+    <form class="filters" method="get">
+      <label>Season
+        <select name="season">
+          <option value="Summer" {% if selected_season == "Summer" %}selected{% endif %}>Summer</option>
+          <option value="Winter" {% if selected_season == "Winter" %}selected{% endif %}>Winter</option>
+        </select>
+      </label>
+      <label>Year
+        <select name="year">
+          <option value="All" {% if selected_year == "All" %}selected{% endif %}>All years</option>
+          {% for year in years %}
+          <option value="{{ year }}" {% if selected_year|string == year|string %}selected{% endif %}>{{ year }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button type="submit">Apply filters</button>
+      <a class="reset" href="/">Reset</a>
+    </form>
+
+    <p class="note">{{ data_note }} Counts are athlete records, not unique physical medals.</p>
+
+    <section class="cards">
+      <article class="card"><span>Athlete records</span><strong>{{ "{:,}".format(summary.athlete_records) }}</strong></article>
+      <article class="card"><span>Medal-winning records</span><strong>{{ "{:,}".format(summary.medal_records) }}</strong></article>
+      <article class="card"><span>Gold records</span><strong>{{ "{:,}".format(summary.gold) }}</strong></article>
+      <article class="card"><span>Silver records</span><strong>{{ "{:,}".format(summary.silver) }}</strong></article>
+      <article class="card"><span>Bronze records</span><strong>{{ "{:,}".format(summary.bronze) }}</strong></article>
+      <article class="card"><span>NOCs represented</span><strong>{{ "{:,}".format(summary.countries) }}</strong></article>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <h2>Top 10 NOCs by medal-winning records</h2>
+        {% if countries %}
+        <div class="bars">
+          {% for item in countries %}
+          <div class="bar-row">
+            <span class="bar-label">{{ item.name }}</span>
+            <div class="bar-track"><div class="bar-fill" style="width: {{ (item.count / countries[0].count * 100) if countries[0].count else 0 }}%"></div></div>
+            <strong>{{ "{:,}".format(item.count) }}</strong>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}<p>No medal records found for these filters.</p>{% endif %}
+      </article>
+      <article class="panel">
+        <h2>Top sports by medal-winning records</h2>
+        {% if sports %}
+        <div class="bars">
+          {% for item in sports %}
+          <div class="bar-row">
+            <span class="bar-label">{{ item.name }}</span>
+            <div class="bar-track"><div class="bar-fill alt" style="width: {{ (item.count / sports[0].count * 100) if sports[0].count else 0 }}%"></div></div>
+            <strong>{{ "{:,}".format(item.count) }}</strong>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}<p>No sport records found for these filters.</p>{% endif %}
+      </article>
+    </section>
+
+    <section class="panel">
+      <h2>Medal trends over time</h2>
+      <p class="muted">This table shows medal-winning athlete records by year and medal type. Use the Tableau workbook for a full interactive trend chart.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Year</th><th>Medal</th><th>Record count</th></tr></thead>
+          <tbody>
+          {% for row in trends %}
+            <tr><td>{{ row.year }}</td><td>{{ row.medal }}</td><td>{{ "{:,}".format(row.count) }}</td></tr>
+          {% else %}
+            <tr><td colspan="3">No medal records found for these filters.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  <footer>Student project · Global Olympic Sports Performance Analysis</footer>
+</body>
+</html>
